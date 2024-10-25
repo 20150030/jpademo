@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Getter
 @Builder
@@ -29,5 +32,25 @@ public class Board extends BaseEntity {
         this.title = title;
         this.content = content;
     }
+    @OneToMany(mappedBy = "board",
+            fetch=FetchType.LAZY,
+            cascade = {CascadeType.ALL},
+            orphanRemoval = true)
+    private Set<BoardImage> imageSet=new HashSet<>();
+
+    public void addImage(String uuid, String fileName){
+        BoardImage image=BoardImage.builder()
+                .uuid(uuid)
+                .fileName(fileName)
+                .board(this)
+                .ord(imageSet.size())
+                .build();
+        imageSet.add(image);
+    }
+    public void clearImages(){
+        imageSet.forEach(boardImage -> boardImage.changeBoard(null));
+        this.imageSet.clear();
+    }
+
 
 }
