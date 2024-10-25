@@ -86,28 +86,35 @@ public class UpDownController {
         return ResponseEntity.ok().headers(headers).body(resource);
     }
     //삭제 구현
-    @GetMapping("/remove/{fileName}")
-    public String remove(@PathVariable("fileName") String fileName) {
-        Resource resource = new FileSystemResource(uploadPath +File.separator + fileName);
+    @GetMapping("/remove")
+    public String removeFile(@RequestParam("fileName") String fileName){
+        log.info("AAAAA"+fileName);
+
+        Resource resource = new FileSystemResource(uploadPath+File.separator + fileName);
         String resourceName = resource.getFilename();
 
-        Map<String,Boolean> resultMap = new HashMap<>();
+        Map<String, Boolean> resultMap = new HashMap<>();
         boolean removed = false;
 
-        try{
+        try {
             String contentType = Files.probeContentType(resource.getFile().toPath());
             removed = resource.getFile().delete();
 
-            //썸네일 존재한다면
+            //섬네일이 존재한다면
             if(contentType.startsWith("image")){
-                File thumbnailFile = new File(uploadPath +File.separator +"s_"+ fileName);
-                thumbnailFile.delete();
+                String fileName1=fileName.replace("s_","");
+                File originalFile = new File(uploadPath+File.separator + fileName1);
+                originalFile.delete();
             }
-        }catch (Exception e){
+
+        } catch (Exception e) {
             log.error(e.getMessage());
         }
-        return "redirect:/upload/uploadForm";
+
+        resultMap.put("result", removed);
+        return "/upload/uploadForm";
     }
+
 
 }
 
